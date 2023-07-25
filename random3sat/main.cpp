@@ -12,7 +12,7 @@ RANDOM 3-SAT
 - using the idea of random walk
 
 
-f = (p & q & r) v (q & r & l) v (r & q & p)
+f = (p v q v r) & (q v r v l) & (r v q v p)
 => n := number of variables = 4
 => m := number of clauses = 3
 
@@ -46,7 +46,7 @@ public:
             // go through each clause
             for (size_t cl_index = 0; cl_index < m_clauses[index].m_literas.size(); ++cl_index)
             {
-                m_clauses[index].m_value &= m_clauses[index].m_literas[cl_index];
+                m_clauses[index].m_value |= m_clauses[index].m_literas[cl_index];
             }
             result &= m_clauses[index].m_value;
         }
@@ -71,9 +71,10 @@ public:
 
 bool random_walk(Assignment a, Function& func)
 {
-    Assignment temp_a = a;
+    // Assignment temp_a = a;
+    vars = a;
 
-    size_t n = temp_a.size();
+    size_t n = vars.size();
     size_t times = 3 * n;
 
     for (size_t index = 0; index < times; ++index)
@@ -98,11 +99,6 @@ int main()
     Clause c2(vars);
     c2.m_literas = vector<bool>{vars[0], vars[3], vars[1]};
 
-    // set some interpretation
-    vars[0] = true;
-    vars[1] = true;
-    vars[2] = true;
-    vars[3] = true;
 
     vector<Clause> clauses {c1, c2};
     Function func1(clauses);
@@ -111,7 +107,8 @@ int main()
 
     Assignment a1 {
     {
-        true, true, false, true,
+        // all true - satisfiable
+        false, false, false, false,
     }
     };
 
