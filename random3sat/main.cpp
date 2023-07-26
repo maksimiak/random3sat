@@ -58,8 +58,6 @@ public:
             result &= m_clauses[index].m_value;
         }
         return result;
-
-        return false;
     }
 
     void display_interpretation()
@@ -118,6 +116,7 @@ bool random_walk(Assignment a, Function& func)
         size_t var_idx = func.m_clauses[unsatisfied].m_indexes[urandom];
         vars[var_idx] = !vars[var_idx];
     }
+    return false;
 }
 
 int main()
@@ -139,7 +138,6 @@ int main()
 
     Function func1(clauses);
     func1.display_interpretation();
-    // func1.evaluate();
 
     Assignment a {false, false, false, false};
 
