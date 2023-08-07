@@ -45,26 +45,25 @@ public:
     bool evaluate()
     {
         bool result = true;
-
         // evaluate each clause and function
-        for (size_t index = 0; index < m_clauses.size(); ++index)
+        for (const auto& clause : m_clauses)
         {
-            // go through each clause
-            for (size_t cl_index = 0; cl_index < m_clauses[index].m_indexes.size(); ++cl_index)
-            {
+            bool temp_value = false; // temporary variable to store the updated value
 
-                int var_idx = m_clauses[index].m_indexes[cl_index];
+            for (size_t cl_index = 0; cl_index < MAX_SAT; ++cl_index)
+            {
+                int var_idx = clause.m_indexes[cl_index];
                 bool value = vars[var_idx];
 
-                if (is_negated(index, cl_index))
+                if (is_negated(clause, cl_index))
                 {
                     value = !value;
                 }
 
-                m_clauses[index].m_value |= value;
-
+                temp_value |= value;
             }
-            result &= m_clauses[index].m_value;
+
+            result &= temp_value; // use the temporary value to update result
         }
 
         cleanup(); // set internal values to false
@@ -73,33 +72,34 @@ public:
 
     void cleanup()
     {
-        for (size_t index = 0; index < m_clauses.size(); ++index)
+        for (auto& clause : m_clauses)
         {
-            m_clauses[index].m_value = false;
+            clause.m_value = false;
         }
     }
 
-    bool is_negated(size_t clause_idx, size_t literal_index)
+    bool is_negated(const Clause& clause, size_t literal_index) const
     {
-         if (find(m_clauses[clause_idx].m_neg_indexes.begin(),
-                         m_clauses[clause_idx].m_neg_indexes.end(), literal_index) != m_clauses[clause_idx].m_neg_indexes.end())
-         {
-
-             return true;
-         }
-         return false;
-
+        return std::find(clause.m_neg_indexes.begin(), clause.m_neg_indexes.end(), literal_index) != clause.m_neg_indexes.end();
     }
 
     void display_interpretation()
     {
-        for (size_t index = 0; index < m_clauses.size(); ++index)
+        for (const auto& clause : m_clauses)
         {
-            for (size_t cl_index = 0; cl_index < m_clauses[index].m_indexes.size(); ++cl_index)
+            for (size_t cl_index = 0; cl_index < MAX_SAT; ++cl_index)
             {
-                cout << vars[m_clauses[index].m_indexes[cl_index]] << " ";
+                int var_idx = clause.m_indexes[cl_index];
+                bool value = vars[var_idx];
+
+                if (is_negated(clause, cl_index))
+                {
+                    value = !value;
+                }
+
+                cout << value << " ";
             }
-            cout << endl;
+            std::cout << std::endl;
         }
     }
 
