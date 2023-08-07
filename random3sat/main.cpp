@@ -44,7 +44,6 @@ public:
 
     bool evaluate()
     {
-
         bool result = true;
 
         // evaluate each clause and function
@@ -53,11 +52,43 @@ public:
             // go through each clause
             for (size_t cl_index = 0; cl_index < m_clauses[index].m_indexes.size(); ++cl_index)
             {
-                m_clauses[index].m_value |= vars[m_clauses[index].m_indexes[cl_index]];
+
+                int var_idx = m_clauses[index].m_indexes[cl_index];
+                bool value = vars[var_idx];
+
+                if (is_negated(index, cl_index))
+                {
+                    value = !value;
+                }
+
+                m_clauses[index].m_value |= value;
+
             }
             result &= m_clauses[index].m_value;
         }
+
+        cleanup(); // set internal values to false
         return result;
+    }
+
+    void cleanup()
+    {
+        for (size_t index = 0; index < m_clauses.size(); ++index)
+        {
+            m_clauses[index].m_value = false;
+        }
+    }
+
+    bool is_negated(size_t clause_idx, size_t literal_index)
+    {
+         if (find(m_clauses[clause_idx].m_neg_indexes.begin(),
+                         m_clauses[clause_idx].m_neg_indexes.end(), literal_index) != m_clauses[clause_idx].m_neg_indexes.end())
+         {
+
+             return true;
+         }
+         return false;
+
     }
 
     void display_interpretation()
@@ -123,17 +154,15 @@ int main()
 {
 
     srand(time(0));
-    // todo: what about negated variables
-    // add another vector thats empty by default as negation list
 
-    Clause c0({2, 1, 1}); // initialized with index of available variables
-    Clause c01({3, 3, 3});
-    Clause c02({2, 0, 0});
+    Clause c0({2, 1, 0}); // initialized with index of available variables
+    Clause c01({2, 0, 3}, {0});
+    Clause c02({1, 1, 0});
 
     vector<Clause> clauses {c0, c01, c02};
 
     /**
-    f = (x3 v x2 v x2) & (x4 v x4 v x4) & (x3 v x1 v x1)
+    f = (x3 v x2 v x1) & (!x3 v x1 v x4) & (x2 v x2 v x1)
     */
 
     Function func1(clauses);
